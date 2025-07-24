@@ -1,6 +1,0 @@
-ClaimID,PolicyNumber,CustomerName,ClaimAmount,ClaimStatus,DateOfClaim,AccidentType,Region
-C001,P10001,John Doe,1200.5,Approved,2023-02-15,Rear-end collision,East Coast
-C002,P10002,Jane Smith,750.0,Denied,2023-03-22,Theft,Midwest
-C003,P10003,Alan Wong,2200.0,Pending,2023-05-11,T-bone collision,West Coast
-C004,P10004,Priya Patel,3100.0,Approved,2023-06-02,Fire damage,South
-C005,P10005,Carlos Ruiz,1300.0,Approved,2023-07-07,Rear-end collision,East Coast
