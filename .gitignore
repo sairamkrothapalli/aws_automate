@@ -1,0 +1,4 @@
+# Ignore Terraform provider binaries and local state
+.terraform/
+.terraform/
+.terraform/
