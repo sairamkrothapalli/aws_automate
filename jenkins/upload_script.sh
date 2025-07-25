@@ -27,6 +27,8 @@ else
   exit 1
 fi
 # ✅ Trigger Glue Job
+GLUE_JOB_NAME="insurance-etl-job"  # Define the job name first
+
 echo "🚀 Triggering AWS Glue Job: $GLUE_JOB_NAME ..."
 aws glue start-job-run --job-name "$GLUE_JOB_NAME"
 
