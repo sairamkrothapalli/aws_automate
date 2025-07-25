@@ -18,10 +18,10 @@ resource "aws_s3_bucket_public_access_block" "block_public" {
 
 # Optional: Create folder-like prefixes in S3
 resource "aws_s3_object" "folders" {
-  for_each = toset(["raw/", "curated/", "logs/"])
+  for_each = toset(["raw/", "curated/", "scripts/"])  # changed from logs/ to scripts/
 
   bucket = aws_s3_bucket.etl_bucket.id
   key    = each.key
- source = "empty.txt"
-etag   = filemd5("empty.txt")
+  source = "empty.txt"
+  etag   = filemd5("empty.txt")
 }
