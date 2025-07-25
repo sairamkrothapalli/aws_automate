@@ -27,9 +27,16 @@ else
   exit 1
 fi
 # ✅ Trigger Glue Job
-GLUE_JOB_NAME="insurance-etl-job"  # Define the job name first
+GLUE_JOB_NAME="insurance-etl-job"
 
-echo "🚀 Triggering AWS Glue Job: $GLUE_JOB_NAME ..."
-aws glue start-job-run --job-name "$GLUE_JOB_NAME"
+# Check if there's any running job
+RUNNING_JOB=$(aws glue get-job-runs --job-name "$GLUE_JOB_NAME" \
+  --query 'JobRuns[?JobRunState==`RUNNING`].Id' --output text)
 
-echo "✅ Glue job triggered successfully!"
+if [ -n "$RUNNING_JOB" ]; then
+  echo "⚠️ A Glue job is already running (JobRunId: $RUNNING_JOB). Skipping new run."
+else
+  echo "🚀 Triggering AWS Glue Job: $GLUE_JOB_NAME ..."
+  aws glue start-job-run --job-name "$GLUE_JOB_NAME"
+  echo "✅ Glue job triggered successfully!"
+fi
