@@ -35,8 +35,25 @@ RUNNING_JOB=$(aws glue get-job-runs --job-name "$GLUE_JOB_NAME" \
 
 if [ -n "$RUNNING_JOB" ]; then
   echo "⚠️ A Glue job is already running (JobRunId: $RUNNING_JOB). Skipping new run."
+  exit 0
 else
   echo "🚀 Triggering AWS Glue Job: $GLUE_JOB_NAME ..."
-  aws glue start-job-run --job-name "$GLUE_JOB_NAME"
-  echo "✅ Glue job triggered successfully!"
+  job_run_id=$(aws glue start-job-run --job-name "$GLUE_JOB_NAME" --query 'JobRunId' --output text)
+  echo "🆔 Triggered job with JobRunId: $job_run_id"
 fi
+
+# ⏳ Wait for the job to complete
+echo "⌛ Waiting for AWS Glue job to complete..."
+
+while true; do
+  state=$(aws glue get-job-run --job-name "$GLUE_JOB_NAME" --run-id "$job_run_id" --query 'JobRun.JobRunState' --output text)
+  echo "🔄 Current job state: $state"
+  if [[ "$state" == "SUCCEEDED" ]]; then
+    echo "✅ Glue job completed successfully!"
+    break
+  elif [[ "$state" == "FAILED" || "$state" == "TIMEOUT" ]]; then
+    echo "❌ Glue job failed with state: $state"
+    exit 1
+  fi
+  sleep 15
+done
