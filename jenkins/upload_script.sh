@@ -8,6 +8,7 @@ ls -R
 CSV_FILE="data/raw/insurance_claims.csv"
 SCRIPT_FILE="data/scripts/glue_transform.py"
 BUCKET="aws--automate"
+GLUE_JOB_NAME="insurance-etl-job"
 
 # Upload CSV file to raw/
 if [ -f "$CSV_FILE" ]; then
@@ -26,16 +27,14 @@ else
   echo "❌ ERROR: Script file not found at path: $SCRIPT_FILE"
   exit 1
 fi
-# ✅ Trigger Glue Job
-GLUE_JOB_NAME="insurance-etl-job"
 
-# Check if there's any running job
+# ✅ Trigger Glue Job only if no other run is active
 RUNNING_JOB=$(aws glue get-job-runs --job-name "$GLUE_JOB_NAME" \
   --query 'JobRuns[?JobRunState==`RUNNING`].Id' --output text)
 
 if [ -n "$RUNNING_JOB" ]; then
   echo "⚠️ A Glue job is already running (JobRunId: $RUNNING_JOB). Skipping new run."
-  exit 0
+  exit 0  # ✅ Don't fail Jenkins build
 else
   echo "🚀 Triggering AWS Glue Job: $GLUE_JOB_NAME ..."
   job_run_id=$(aws glue start-job-run --job-name "$GLUE_JOB_NAME" --query 'JobRunId' --output text)
@@ -44,16 +43,15 @@ fi
 
 # ⏳ Wait for the job to complete
 echo "⌛ Waiting for AWS Glue job to complete..."
-
 while true; do
   state=$(aws glue get-job-run --job-name "$GLUE_JOB_NAME" --run-id "$job_run_id" --query 'JobRun.JobRunState' --output text)
   echo "🔄 Current job state: $state"
   if [[ "$state" == "SUCCEEDED" ]]; then
     echo "✅ Glue job completed successfully!"
-    break
+    exit 0  # ✅ Jenkins: mark as success
   elif [[ "$state" == "FAILED" || "$state" == "TIMEOUT" ]]; then
     echo "❌ Glue job failed with state: $state"
-    exit 1
+    exit 1  # ❌ Jenkins: mark as failure
   fi
   sleep 15
 done
