@@ -26,3 +26,8 @@ else
   echo "❌ ERROR: Script file not found at path: $SCRIPT_FILE"
   exit 1
 fi
+# ✅ Trigger Glue Job
+echo "🚀 Triggering AWS Glue Job: $GLUE_JOB_NAME ..."
+aws glue start-job-run --job-name "$GLUE_JOB_NAME"
+
+echo "✅ Glue job triggered successfully!"
