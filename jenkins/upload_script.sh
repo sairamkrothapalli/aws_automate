@@ -5,13 +5,24 @@ echo "🔍 Working directory: $(pwd)"
 echo "📂 Listing files inside workspace:"
 ls -R
 
-FILE_PATH="data/raw/insurance_claims.csv"
+CSV_FILE="data/raw/insurance_claims.csv"
+SCRIPT_FILE="data/scripts/glue_transform.py"
 BUCKET="aws--automate"
 
-if [ -f "$FILE_PATH" ]; then
-  echo "📤 Uploading $FILE_PATH to S3 bucket $BUCKET..."
-  aws s3 cp "$FILE_PATH" s3://$BUCKET/raw/
+# Upload CSV file to raw/
+if [ -f "$CSV_FILE" ]; then
+  echo "📤 Uploading $CSV_FILE to S3 bucket $BUCKET/raw/..."
+  aws s3 cp "$CSV_FILE" s3://$BUCKET/raw/
 else
-  echo "❌ ERROR: File not found at path: $FILE_PATH"
+  echo "❌ ERROR: CSV file not found at path: $CSV_FILE"
+  exit 1
+fi
+
+# Upload Glue script to scripts/
+if [ -f "$SCRIPT_FILE" ]; then
+  echo "📤 Uploading $SCRIPT_FILE to S3 bucket $BUCKET/scripts/..."
+  aws s3 cp "$SCRIPT_FILE" s3://$BUCKET/scripts/
+else
+  echo "❌ ERROR: Script file not found at path: $SCRIPT_FILE"
   exit 1
 fi
